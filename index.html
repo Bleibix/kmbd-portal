@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMBD-NRW – Dienstportal</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#1c2128;color:#d4d8de;min-height:100vh;font-size:14px}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#14171c}
+.login-card{background:#21262d;border-radius:6px;border:1px solid #30363d;padding:2.5rem 2.25rem;width:380px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px}
+.login-logo-icon{width:50px;height:50px;background:#2d4356;border:1px solid #3d5a78;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.login-logo-icon svg{stroke:#7da6c9;fill:none}
+.login-title{font-size:19px;font-weight:600;color:#e6edf3;letter-spacing:.01em}
+.login-card input{width:100%;padding:10px 13px;border:1px solid #30363d;border-radius:4px;font-size:13px;margin-bottom:10px;outline:none;transition:border .15s;background:#14171c;color:#d4d8de}
+.login-card input:focus{border-color:#4d7298}
+.login-card input::placeholder{color:#4a5560}
+.login-btn{width:100%;padding:10px;background:#2d4356;color:#e6edf3;border:1px solid #3d5a78;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px;letter-spacing:.02em}
+.login-btn:hover{background:#36506a}
+.login-error{color:#e5989b;font-size:12px;margin-bottom:10px;display:none;background:#2d1a1c;padding:8px 10px;border-radius:4px;border:1px solid #5c2e30;text-align:left}
+
+/* APP */
+#app{display:none}
+.sidebar{position:fixed;top:0;left:0;width:230px;height:100vh;background:#161b22;padding:0;z-index:100;overflow-y:auto;display:flex;flex-direction:column;border-right:1px solid #30363d}
+.sidebar-header{padding:16px 14px 12px;border-bottom:1px solid #30363d}
+.sidebar-logo{font-size:15px;font-weight:700;color:#e6edf3;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.sidebar-sub{font-size:10px;color:#6e7681;margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+.sidebar-section{padding:14px 14px 5px;font-size:10px;color:#586069;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;color:#8b949e;font-size:13px;font-weight:500;transition:all .12s;border-left:2px solid transparent}
+.nav-item:hover{background:#1c2128;color:#d4d8de}
+.nav-item.active{background:#1c2933;color:#7da6c9;border-left-color:#4d7298}
+.nav-item svg{flex-shrink:0;opacity:.85}
+.sidebar-logout{margin-top:auto;padding:14px;border-top:1px solid #30363d}
+.sidebar-user-lbl{font-size:11px;color:#6e7681;margin-bottom:7px}
+.logout-btn{width:100%;padding:8px;background:#1c2128;border:1px solid #30363d;border-radius:4px;color:#8b949e;font-size:12px;cursor:pointer;transition:all .15s}
+.logout-btn:hover{background:#1c2933;color:#d4d8de}
+
+.main{margin-left:230px;padding:24px 28px;min-height:100vh}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #30363d}
+.page-title{font-size:18px;font-weight:600;color:#e6edf3}
+.page-sub{font-size:12px;color:#6e7681;margin-top:3px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:3px;margin-right:8px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;background:#1c2933;color:#7da6c9;border:1px solid #2d4356}
+
+/* FORM CARDS */
+.form-card{background:#21262d;border-radius:6px;border:1px solid #30363d;margin-bottom:18px;overflow:hidden}
+.form-card-header{background:#1c2128;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #30363d}
+.form-card-title{color:#c9d1d9;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.form-card-body{padding:16px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.field-grid.full{grid-template-columns:1fr}
+.field-label{font-size:11px;font-weight:600;color:#7da6c9;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px}
+.field-input{width:100%;padding:7px 10px;border:1px solid #30363d;border-radius:4px;font-size:13px;outline:none;transition:border .15s;background:#14171c;color:#d4d8de;font-family:inherit}
+.field-input:focus{border-color:#4d7298}
+.field-input::placeholder{color:#4a5560}
+textarea.field-input{resize:vertical;min-height:60px}
+.cb-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;margin-bottom:4px}
+.cb-item{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;padding:5px 11px;border:1px solid #30363d;border-radius:4px;background:#14171c;color:#8b949e;transition:all .15s;user-select:none}
+.cb-item:hover{border-color:#4d7298;background:#1c2933;color:#d4d8de}
+.cb-item input[type=checkbox]{width:14px;height:14px;accent-color:#4d7298;cursor:pointer}
+.checklist-row{display:grid;grid-template-columns:30px 1fr 80px 80px;align-items:center;border-bottom:1px solid #262c34;padding:8px 0}
+.checklist-row:last-child{border-bottom:none}
+.cl-num{font-size:12px;font-weight:700;color:#7da6c9}
+.cl-text{font-size:12.5px;color:#c9d1d9}
+.cl-check{text-align:center}
+.cl-check input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#4d7298}
+.print-bar{display:flex;justify-content:flex-end;margin-bottom:16px;gap:8px}
+.btn{padding:7px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid transparent;letter-spacing:.02em}
+.btn-primary{background:#2d4356;color:#e6edf3;border-color:#3d5a78}
+.btn-primary:hover{background:#36506a}
+.btn-outline{background:#21262d;color:#7da6c9;border-color:#30363d}
+.btn-outline:hover{background:#1c2933;border-color:#4d7298}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sig-box{border:1px solid #30363d;border-radius:4px;min-height:72px;background:#14171c;position:relative;overflow:hidden}
+.sig-input{width:100%;height:72px;border:none;background:transparent;font-family:"Dancing Script",cursive;font-size:26px;color:#7da6c9;padding:8px 12px;outline:none;cursor:text;line-height:72px}
+.sig-input::placeholder{font-family:"Dancing Script",cursive;font-size:18px;color:#30363d;font-style:italic}
+.sig-clear{position:absolute;top:4px;right:6px;font-size:10px;color:#586069;cursor:pointer;background:none;border:none;padding:2px 4px;border-radius:3px;transition:color .15s}
+.sig-clear:hover{color:#e5989b}
+.sig-label{font-size:11px;font-weight:600;color:#7da6c9;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+
+/* DASHBOARD */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-bottom:22px;background:#30363d;border:1px solid #30363d;border-radius:6px;overflow:hidden}
+.stat-card{background:#21262d;padding:16px 18px}
+.stat-num{font-size:24px;font-weight:700;color:#e6edf3;font-family:"Consolas",monospace}
+.stat-lbl{font-size:11px;color:#6e7681;margin-top:4px;text-transform:uppercase;letter-spacing:.03em}
+.stat-card.accent .stat-num{color:#7da6c9}
+.stat-card.accent .stat-lbl{color:#5a7793}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dash-card{background:#21262d;border:1px solid #30363d;border-radius:6px;overflow:hidden;cursor:pointer;transition:border .15s}
+.dash-card:hover{border-color:#4d7298}
+.dash-card-head{padding:10px 16px;display:flex;align-items:center;gap:10px;background:#1c2128;border-bottom:1px solid #30363d}
+.dash-card-body{padding:10px 16px 14px;font-size:12.5px;color:#6e7681}
+
+/* INFO PAGE */
+.info-section{background:#21262d;border-radius:6px;border:1px solid #30363d;margin-bottom:18px;overflow:hidden}
+.info-section-head{background:#1c2128;padding:10px 16px;border-bottom:1px solid #30363d}
+.info-section-title{color:#c9d1d9;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.info-section-body{padding:16px}
+.info-rule{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #262c34;align-items:flex-start}
+.info-rule:last-child{border-bottom:none}
+.info-rule-num{min-width:26px;height:26px;background:#1c2933;color:#7da6c9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;border:1px solid #2d4356}
+.info-rule-text{font-size:12.5px;line-height:1.6;color:#c9d1d9}
+.info-rule-label{font-weight:600;color:#7da6c9}
+.info-tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10.5px;font-weight:700;margin-right:4px;text-transform:uppercase;letter-spacing:.02em}
+.tag-red{background:#3d2528;color:#e5989b;border:1px solid #5c2e30}
+.tag-green{background:#1f3326;color:#7fc99a;border:1px solid #2f5238}
+.tag-blue{background:#1c2933;color:#7da6c9;border:1px solid #2d4356}
+.tag-yellow{background:#332916;color:#d4a04a;border:1px solid #4a3a1c}
+.info-box{background:#1c2933;border-left:3px solid #4d7298;border-radius:0 4px 4px 0;padding:10px 14px;font-size:12.5px;color:#9bbcd6;line-height:1.6;margin-top:10px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* KAMPFMITTEL */
+.km-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.km-card{background:#21262d;border-radius:6px;border:1px solid #30363d;overflow:hidden;cursor:pointer;transition:border .15s}
+.km-card:hover{border-color:#4d7298}
+.km-card.open{border-color:#7da6c9}
+.km-card-head{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.km-icon{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;background:#1c2128!important;border:1px solid #30363d}
+.km-card-title{font-size:13.5px;font-weight:700;color:#e6edf3}
+.km-card-sub{font-size:11px;color:#6e7681;margin-top:1px}
+.km-body{padding:0 16px 16px;display:none}
+.km-card.open .km-body{display:block}
+.km-divider{border:none;border-top:1px solid #262c34;margin:10px 0}
+.km-row{display:flex;gap:8px;margin-bottom:6px;font-size:12.5px}
+.km-key{color:#6e7681;min-width:120px;flex-shrink:0}
+.km-val{color:#c9d1d9;font-weight:500}
+.danger-tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.dt-hoch{background:#3d2528;color:#e5989b;border:1px solid #5c2e30}
+.dt-mittel{background:#332916;color:#d4a04a;border:1px solid #4a3a1c}
+.dt-niedrig{background:#1f3326;color:#7fc99a;border:1px solid #2f5238}
+
+@media print{
+  .sidebar,.print-bar,#login-screen,.sidebar-logout{display:none!important}
+  .main{margin-left:0!important;padding:10px!important}
+  .page{display:none!important}
+  .page.active{display:block!important}
+  body{background:#fff!important;color:#000!important}
+  .form-card{background:#fff!important;border:1px solid #ccc!important;break-inside:avoid}
+  .form-card-header{background:#1F3864!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .form-card-title{color:#fff!important}
+  .field-input{border:1px solid #ccc!important;background:#fff!important;color:#000!important}
+  .field-label{color:#1F3864!important}
+  .cb-item{border:1px solid #ccc!important;background:#fff!important;color:#000!important}
+  .sig-box{border:1px solid #ccc!important;background:#fff!important}
+.sig-input{color:#000!important;font-family:"Dancing Script",cursive!important}
+.sig-clear{display:none!important}
+  .checklist-row{border-bottom:1px solid #eee!important}
+  .cl-num{color:#1F3864!important}
+  .cl-text{color:#000!important}
+  .page-title{color:#1F3864!important}
+  .badge{background:#EBF0F8!important;color:#1F3864!important;border:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2zm0 2.18L19 8.5v7l-7 3.88L5 15.5v-7l7-4.32zM12 8a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4z"/></svg>
+      </div>
+      <div style="text-align:left">
+        <div class="login-title">KMBD-NRW</div>
+        <div style="font-size:11px;color:#64748b">Landespolizei Nordrhein-Westfalen</div>
+      </div>
+    </div>
+    <div class="login-error" id="login-error">Zugangsdaten falsch. Bitte erneut versuchen.</div>
+    <input type="text" id="login-user" placeholder="Benutzername" autocomplete="off">
+    <input type="password" id="login-pass" placeholder="Passwort" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Anmelden</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">KMBD-NRW</div>
+      <div class="sidebar-sub">Landespolizei NRW · Dienstportal</div>
+    </div>
+    <div class="sidebar-section">Übersicht</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('info',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Infoseite Beamte
+    </div>
+    <div class="sidebar-section">Formulare</div>
+    <div class="nav-item" onclick="showPage('kb01',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      KB-01 Einsatzbericht
+    </div>
+    <div class="nav-item" onclick="showPage('kb02',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      KB-02 Kitverwendung
+    </div>
+    <div class="nav-item" onclick="showPage('kb03',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      KB-03 Verletzung
+    </div>
+    <div class="nav-item" id="nav-km" onclick="showPage('kampfmittel',this)">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Kampfmittel-Lexikon
+    </div>
+    <div class="sidebar-section" id="sec-ausbilder" style="display:none">Ausbilder</div>
+    <div class="nav-item" id="nav-kb04" onclick="showPage('kb04',this)" style="display:none">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      KB-04 Ausbildungsnachweis
+    </div>
+    <div class="nav-item" id="nav-kb05" onclick="showPage('kb05',this)" style="display:none">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      KB-05 Prüfungsprotokoll
+    </div>
+    <div class="nav-item" id="nav-benutzer" onclick="showPage('benutzer',this)" style="display:none">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Benutzerverwaltung
+    </div>
+    <div class="nav-item" id="nav-personalakten" onclick="showPage('personalakten',this)" style="display:none">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Personalakten
+    </div>
+    <div class="sidebar-logout">
+      <div class="sidebar-user-lbl" id="sidebar-user"></div>
+      <button class="logout-btn" onclick="doLogout()">Abmelden</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">KMBD Landespolizei NRW – Willkommen im Dienstportal</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card accent">
+          <div class="stat-num" id="dash-form-count">3</div>
+          <div class="stat-lbl">Formulare verfügbar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="dash-role">–</div>
+          <div class="stat-lbl">Zugangsstufe</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">12</div>
+          <div class="stat-lbl">Kampfmittel im Lexikon</div>
+        </div>
+      </div>
+      <div class="dash-grid" id="dash-cards">
+        <div class="dash-card" onclick="showPage('info',document.querySelectorAll('.nav-item')[1])">
+          <div class="dash-card-head" style="background:#1e4a7a"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">INFO</span><span style="color:#fff;font-size:14px;font-weight:600">Infoseite Beamte</span></div>
+          <div class="dash-card-body">Wichtigste Informationen aus dem Ausbildungsleitfaden – Sperrzonen, Protokoll, goldene Regeln.</div>
+        </div>
+        <div class="dash-card" onclick="showPage('kb01',document.querySelectorAll('.nav-item')[2])">
+          <div class="dash-card-head" style="background:#1e3a5f"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">KB-01</span><span style="color:#fff;font-size:14px;font-weight:600">Einsatzbericht</span></div>
+          <div class="dash-card-body">Vollständige Dokumentation eines KMBD-Einsatzes inkl. Kampfmittelbeschreibung und Maßnahmen.</div>
+        </div>
+        <div class="dash-card" onclick="showPage('kb02',document.querySelectorAll('.nav-item')[3])">
+          <div class="dash-card-head" style="background:#1e3a5f"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">KB-02</span><span style="color:#fff;font-size:14px;font-weight:600">Kitverwendungsprotokoll</span></div>
+          <div class="dash-card-body">Protokoll über den Einsatz des Bombenentschärfungskits inkl. Vor- und Nachprüfung.</div>
+        </div>
+        <div class="dash-card" onclick="showPage('kb03',document.querySelectorAll('.nav-item')[4])">
+          <div class="dash-card-head" style="background:#1e3a5f"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">KB-03</span><span style="color:#fff;font-size:14px;font-weight:600">Verletzungsprotokoll</span></div>
+          <div class="dash-card-body">Meldung und Dokumentation von Verletzungen bei KMBD-Einsätzen.</div>
+        </div>
+        <div class="dash-card" onclick="showPage('kampfmittel',document.getElementById('nav-km'))">
+          <div class="dash-card-head" style="background:#1e4a7a"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">LEXIKON</span><span style="color:#fff;font-size:14px;font-weight:600">Kampfmittel-Nachschlagewerk</span></div>
+          <div class="dash-card-body">Detaillierte Informationen zu Kampfmitteltypen, Erkennungsmerkmalen und Sofortverhalten.</div>
+        </div>
+        <div class="dash-card" id="dash-kb04-card" style="display:none" onclick="showPage('kb04',document.getElementById('nav-kb04'))">
+          <div class="dash-card-head" style="background:#1e3a5f"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">KB-04</span><span style="color:#fff;font-size:14px;font-weight:600">Ausbildungsnachweis</span></div>
+          <div class="dash-card-body">Nachweis der absolvierten Ausbildungsphasen eines KMBD-Beamten.</div>
+        </div>
+        <div class="dash-card" id="dash-kb05-card" style="display:none" onclick="showPage('kb05',document.getElementById('nav-kb05'))">
+          <div class="dash-card-head" style="background:#1e3a5f"><span class="badge" style="background:rgba(255,255,255,.15);color:#fff">KB-05</span><span style="color:#fff;font-size:14px;font-weight:600">Prüfungsprotokoll</span></div>
+          <div class="dash-card-body">Protokoll der KMBD-Abschlussprüfung inkl. Theorie- und Praxisteil.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFOSEITE -->
+    <div class="page" id="page-info">
+      <div class="page-header">
+        <div class="page-title">Infoseite – Wichtige Informationen für KMBD-Beamte</div>
+        <div class="page-sub">Kompaktzusammenfassung aus dem Ausbildungsleitfaden – zum schnellen Nachlesen</div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">🛡️ Aufgaben des KMBD</div></div>
+        <div class="info-section-body">
+          <div class="info-rule"><div class="info-rule-num">1</div><div class="info-rule-text"><span class="info-rule-label">Auftrag:</span> Der KMBD ist zuständig für Erkundung, Sicherung, Bergung und Beseitigung von Kampfmitteln jeder Art – darunter Sprengmittel, unbekannte verdächtige Pakete und improvisierte Sprengvorrichtungen (IED).</div></div>
+          <div class="info-rule"><div class="info-rule-num">2</div><div class="info-rule-text"><span class="info-rule-label">Zuständigkeit:</span> Der KMBD wird nur auf Anforderung der Leitstelle oder auf Weisung des Einsatzleiters tätig. Kein eigenständiges Eingreifen ohne Beauftragung.</div></div>
+          <div class="info-rule"><div class="info-rule-num">3</div><div class="info-rule-text"><span class="info-rule-label">Zusammenarbeit:</span> Der KMBD arbeitet eng mit Feuerwehr, SEK, THW und Rettungsdienst zusammen. Kommunikation läuft immer über die Leitstelle.</div></div>
+          <div class="info-box">Motto des KMBD: <strong>Sorgfalt vor Schnelligkeit</strong> – jede Situation wird besonnen und methodisch angegangen. Fehler können Leben kosten.</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">📏 Sperrzonen – Abstände und Regeln</div></div>
+        <div class="info-section-body">
+          <div class="info-grid">
+            <div style="background:#2d1515;border-radius:8px;padding:14px">
+              <div style="font-size:12px;font-weight:700;color:#fc8181;text-transform:uppercase;margin-bottom:6px">Innere Sperrzone</div>
+              <div style="font-size:28px;font-weight:800;color:#fc8181">50 m</div>
+              <div style="font-size:13px;color:#fc8181;margin-top:4px">Nur KMBD-Personal mit vollständiger Schutzausrüstung. Kein anderes Personal.</div>
+            </div>
+            <div style="background:#2d2010;border-radius:8px;padding:14px">
+              <div style="font-size:12px;font-weight:700;color:#f6ad55;text-transform:uppercase;margin-bottom:6px">Äußere Sperrzone</div>
+              <div style="font-size:28px;font-weight:800;color:#f6ad55">200 m</div>
+              <div style="font-size:13px;color:#f6ad55;margin-top:4px">Polizeiabsperrung. Presse, Schaulustige und nicht beteiligte Einheiten fernhalten.</div>
+            </div>
+          </div>
+          <div class="info-rule" style="margin-top:12px"><div class="info-rule-num">!</div><div class="info-rule-text"><span class="info-rule-label">Fahrzeugbomben (VBIED):</span> Sonderfall – Mindestabstand <strong>300–500 m</strong>. Gesamten Block evakuieren.</div></div>
+          <div class="info-rule"><div class="info-rule-num">!</div><div class="info-rule-text"><span class="info-rule-label">Nach Entschärfung:</span> Wartezeit von mindestens <strong>10 Minuten</strong> einhalten, bevor das Objekt erneut betreten wird.</div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">📋 Einsatzprotokoll – Kurzfassung</div></div>
+        <div class="info-section-body">
+          <div class="info-rule"><div class="info-rule-num">1</div><div class="info-rule-text"><span class="info-rule-label">Alarmierung:</span> Leitstelle alarmiert KMBD. Alarmierungszeit dokumentieren. Anfahrt mit Blaulicht nur bis zur äußeren Sperrzone.</div></div>
+          <div class="info-rule"><div class="info-rule-num">2</div><div class="info-rule-text"><span class="info-rule-label">Sperrzonenerrichtung:</span> Innere (50 m) und äußere (200 m) Sperrzone errichten. Zivilisten evakuieren. Schutzausrüstung anlegen.</div></div>
+          <div class="info-rule"><div class="info-rule-num">3</div><div class="info-rule-text"><span class="info-rule-label">Erkundung:</span> Annäherung nur allein oder mit zweitem KMBD-Beamten. Kein Berühren oder Bewegen in dieser Phase. Lageeinschätzung an Leitstelle melden.</div></div>
+          <div class="info-rule"><div class="info-rule-num">4</div><div class="info-rule-text"><span class="info-rule-label">Entschärfung:</span> Bombenentschärfungskit positionieren und anwenden. Jeden Schritt laut ansagen. Nach Auslösung sofort auf mindestens 50 m zurückziehen.</div></div>
+          <div class="info-rule"><div class="info-rule-num">5</div><div class="info-rule-text"><span class="info-rule-label">Nachbereitung:</span> 10 Minuten Wartezeit. Sichtkontrolle. Leitstelle informieren. Sperrzone aufheben. Einsatzbericht (KB-01) ausfüllen.</div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">🔧 Bombenentschärfungskit – Wichtigste Punkte</div></div>
+        <div class="info-section-body">
+          <div class="info-rule"><div class="info-rule-num">1</div><div class="info-rule-text"><span class="info-rule-label">Berechtigung:</span> Das Kit darf <strong>ausschließlich von zertifizierten KMBD-Beamten</strong> verwendet werden. Unberechtigte Nutzung wird disziplinarisch geahndet.</div></div>
+          <div class="info-rule"><div class="info-rule-num">2</div><div class="info-rule-text"><span class="info-rule-label">Vor dem Einsatz prüfen:</span> Hauptmodul, Auslösemechanismus, Schutzfolie, Diagnosesonde, Werkzeugset, Verfallsdaten und Transportbehälter – alle Punkte per KB-02 dokumentieren.</div></div>
+          <div class="info-rule"><div class="info-rule-num">3</div><div class="info-rule-text"><span class="info-rule-label">Einsatz:</span> Kit am Kampfmittel positionieren, jeden Schritt laut ansagen, nach Auslösung sofort mindestens 50 m Abstand nehmen.</div></div>
+          <div class="info-rule"><div class="info-rule-num">4</div><div class="info-rule-text"><span class="info-rule-label">Nach dem Einsatz:</span> Kit auf Schäden prüfen, Protokoll KB-02 ausfüllen, fehlende Komponenten sofort melden und nachbestellen.</div></div>
+          <div class="info-box"><strong>Nicht bei allen Kampfmitteln einsetzbar!</strong> Bei Fahrzeugbomben, CBRN-Verdacht, losen Explosivstoffen und Seeminen ist kein Kit-Einsatz möglich. Dann: kontrollierte Sprengung oder Spezialeinheit anfordern.</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">⚠️ Goldene Regeln des KMBD</div></div>
+        <div class="info-section-body">
+          <div class="info-rule"><div class="info-rule-num" style="background:#8B0000">1</div><div class="info-rule-text"><span class="tag-red info-tag">PFLICHT</span> Niemals allein handeln – immer mindestens eine weitere Person informieren.</div></div>
+          <div class="info-rule"><div class="info-rule-num" style="background:#8B0000">2</div><div class="info-rule-text"><span class="tag-red info-tag">PFLICHT</span> Niemals ein Kampfmittel ohne vollständige Schutzausrüstung berühren.</div></div>
+          <div class="info-rule"><div class="info-rule-num" style="background:#8B0000">3</div><div class="info-rule-text"><span class="tag-red info-tag">PFLICHT</span> Niemals ein Kampfmittel ohne Genehmigung des Einsatzführers bewegen.</div></div>
+          <div class="info-rule"><div class="info-rule-num">4</div><div class="info-rule-text"><span class="tag-blue info-tag">GRUNDSATZ</span> Immer ruhig bleiben – Panik führt zu Fehlern, die Leben kosten.</div></div>
+          <div class="info-rule"><div class="info-rule-num">5</div><div class="info-rule-text"><span class="tag-blue info-tag">GRUNDSATZ</span> Immer die Leitstelle informiert halten – keine Alleingänge, keine eigenmächtigen Entscheidungen.</div></div>
+          <div class="info-rule"><div class="info-rule-num">6</div><div class="info-rule-text"><span class="tag-blue info-tag">GRUNDSATZ</span> Immer das Protokoll einhalten, auch wenn es länger dauert. Mut ist nicht gleich Leichtsinn.</div></div>
+          <div class="info-rule"><div class="info-rule-num">7</div><div class="info-rule-text"><span class="tag-green info-tag">TIPP</span> Bei Unsicherheit: Rückzug und Rücksprache. Im Zweifel gilt: Distanz halten, Leitstelle informieren, auf Anweisung warten.</div></div>
+          <div class="info-box"><strong>Goldene Regel:</strong> Im Zweifelsfall gilt immer – Distanz halten, Leitstelle informieren, auf Anweisung warten.</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">📞 Kommunikation im Einsatz</div></div>
+        <div class="info-section-body">
+          <div class="info-rule"><div class="info-rule-num">1</div><div class="info-rule-text"><span class="info-rule-label">Funkdisziplin:</span> Klare, kurze Meldungen. Kein unnötiger Funk in der inneren Sperrzone bei RCIED-Verdacht (Fernzündungsgefahr).</div></div>
+          <div class="info-rule"><div class="info-rule-num">2</div><div class="info-rule-text"><span class="info-rule-label">Erste Meldung:</span> Einsatzort, Art des Kampfmittels, errichtete Sperrzonen, eigene Position und Anforderungen sofort an Leitstelle melden.</div></div>
+          <div class="info-rule"><div class="info-rule-num">3</div><div class="info-rule-text"><span class="info-rule-label">Während Entschärfung:</span> Jeden Schritt laut ansagen – der Partner wiederholt zur Bestätigung. Kein Schritt ohne Rückmeldung.</div></div>
+          <div class="info-rule"><div class="info-rule-num">4</div><div class="info-rule-text"><span class="info-rule-label">Abschlussmeldung:</span> Nach erfolgreicher Neutralisierung sofort Leitstelle informieren, Ergebnis mitteilen und Freigabe zur Sperrzonenauflösung einholen.</div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-head"><div class="info-section-title">🏗️ Hierarchie im KMBD</div></div>
+        <div class="info-section-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:#1e2535;border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:4px">KMBD-Leiter</div>
+              <div style="font-size:12px;color:#94a3b8">Leitung der Einheit, Entscheidungsgewalt im Einsatz. Alle Einsätze.</div>
+            </div>
+            <div style="background:#1e2535;border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:4px">KMBD-Ausbilder</div>
+              <div style="font-size:12px;color:#94a3b8">Ausbildung von Beamten, Qualitätskontrolle. Eigenständige Einsätze + Ausbildung.</div>
+            </div>
+            <div style="background:#1e2535;border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:4px">KMBD-Beamter (zertifiziert)</div>
+              <div style="font-size:12px;color:#94a3b8">Selbstständige Einsätze. Alle genehmigten Kampfmitteleinsätze.</div>
+            </div>
+            <div style="background:#131720;border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:4px">KMBD-Beamter (in Ausbildung)</div>
+              <div style="font-size:12px;color:#4a5568">Nur unter Aufsicht eines Ausbilders. Kein eigenständiger Einsatz.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KB-01 -->
+    <div class="page" id="page-kb01">
+      <div class="page-header"><span class="badge">KB-01</span><div class="page-title" style="display:inline">Einsatzbericht KMBD</div><div class="page-sub">Für jeden abgeschlossenen KMBD-Einsatz auszufüllen</div></div>
+      <div class="print-bar">
+        <button class="btn btn-outline" onclick="clearForm('kb01')">Leeren</button>
+        <button class="btn btn-primary" onclick="printPage('kb01')">&#128438; Drucken</button>
+      </div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">A – Einsatzdaten</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Einsatzdatum</div><input type="date" class="field-input" id="k1-datum"></div>
+          <div><div class="field-label">Einsatznummer</div><input type="text" class="field-input" placeholder="z.B. KMBD-2025-001" id="k1-nr"></div>
+          <div><div class="field-label">Einsatzzeit Beginn</div><input type="time" class="field-input" id="k1-tbeg"></div>
+          <div><div class="field-label">Einsatzzeit Ende</div><input type="time" class="field-input" id="k1-tend"></div>
+        </div>
+        <div class="field-grid full">
+          <div><div class="field-label">Einsatzort / Adresse</div><input type="text" class="field-input" placeholder="Straße, Hausnr., PLZ, Ort" id="k1-ort"></div>
+          <div><div class="field-label">Zuständige Dienststelle</div><input type="text" class="field-input" id="k1-stelle"></div>
+        </div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">B – Einsatzkräfte</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Einsatzleiter KMBD</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="k1-el"></div>
+          <div><div class="field-label">2. KMBD-Beamter</div><input type="text" class="field-input" placeholder="Name (falls vorhanden)" id="k1-el2"></div>
+          <div><div class="field-label">Alarmierungszeit</div><input type="time" class="field-input" id="k1-alarm"></div>
+          <div><div class="field-label">Ankunftszeit vor Ort</div><input type="time" class="field-input" id="k1-ank"></div>
+        </div>
+        <div class="field-grid full"><div><div class="field-label">Unterstützende Einheiten</div><input type="text" class="field-input" placeholder="z.B. Feuerwehr, SEK, THW" id="k1-einh"></div></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">C – Kampfmittelbeschreibung</span></div><div class="form-card-body">
+        <div class="field-label">Art des Kampfmittels</div>
+        <div class="cb-row">
+          <label class="cb-item"><input type="checkbox"> Sprengmittel</label>
+          <label class="cb-item"><input type="checkbox"> IED (improvisiert)</label>
+          <label class="cb-item"><input type="checkbox"> Unbekanntes Paket</label>
+          <label class="cb-item"><input type="checkbox"> Weltkriegsmunition</label>
+          <label class="cb-item"><input type="checkbox"> Sonstiges</label>
+        </div>
+        <div class="field-grid" style="margin-top:12px">
+          <div><div class="field-label">Fundort (genau)</div><input type="text" class="field-input" placeholder="Genaue Beschreibung" id="k1-fund"></div>
+          <div><div class="field-label">Größe / Abmessungen</div><input type="text" class="field-input" placeholder="ca. Maße in cm" id="k1-groesse"></div>
+        </div>
+        <div class="field-label">Zündmechanismus erkennbar?</div>
+        <div class="cb-row">
+          <label class="cb-item"><input type="checkbox"> Ja</label>
+          <label class="cb-item"><input type="checkbox"> Nein</label>
+          <label class="cb-item"><input type="checkbox"> Unbekannt</label>
+        </div>
+        <div style="margin-top:10px"><div class="field-label">Beschreibung Zündmechanismus</div><textarea class="field-input" id="k1-zuendbeschr"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">D – Durchgeführte Maßnahmen</span></div><div class="form-card-body">
+        <div class="field-label">Sperrzone errichtet?</div>
+        <div class="cb-row">
+          <label class="cb-item"><input type="checkbox"> Innere Sperrzone (50 m)</label>
+          <label class="cb-item"><input type="checkbox"> Äußere Sperrzone (200 m)</label>
+          <label class="cb-item"><input type="checkbox"> Keine – Begründung s. unten</label>
+        </div>
+        <div class="field-label" style="margin-top:12px">Entschärfungsmethode</div>
+        <div class="cb-row">
+          <label class="cb-item"><input type="checkbox"> Bombenentschärfungskit</label>
+          <label class="cb-item"><input type="checkbox"> Kontrollierte Sprengung</label>
+          <label class="cb-item"><input type="checkbox"> Abtransport</label>
+          <label class="cb-item"><input type="checkbox"> Sonstige</label>
+        </div>
+        <div class="field-label" style="margin-top:12px">Ergebnis</div>
+        <div class="cb-row">
+          <label class="cb-item"><input type="checkbox"> Erfolgreich neutralisiert</label>
+          <label class="cb-item"><input type="checkbox"> Fehlgeschlagen</label>
+          <label class="cb-item"><input type="checkbox"> Abgebrochen</label>
+          <label class="cb-item"><input type="checkbox"> Weitergeleitet</label>
+        </div>
+        <div style="margin-top:12px"><div class="field-label">Einsatzbeschreibung (Freitext)</div><textarea class="field-input" style="min-height:80px" id="k1-beschr"></textarea></div>
+        <div style="margin-top:8px"><div class="field-label">Besonderheiten / Abweichungen</div><textarea class="field-input" id="k1-beson"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">E – Verluste / Schäden</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Verletzte Personen</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Keine</label><label class="cb-item"><input type="checkbox"> KMBD-Personal</label><label class="cb-item"><input type="checkbox"> Zivilpersonen</label></div></div>
+          <div><div class="field-label">Anzahl Verletzte</div><input type="number" class="field-input" min="0" id="k1-anzverl"></div>
+        </div>
+        <div><div class="field-label">Sachschäden / Beschreibung</div><textarea class="field-input" id="k1-schaden"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">F – Unterschriften</span></div><div class="form-card-body">
+        <div class="sig-grid"><div><div class="sig-label">Einsatzleiter KMBD</div><div class="sig-box"><input class="sig-input" id="sig-1" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-1').value=''">✕ Löschen</button></div></div><div><div class="sig-label">Genehmigung KMBD-Leiter</div><div class="sig-box"><input class="sig-input" id="sig-2" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-2').value=''">✕ Löschen</button></div></div></div>
+      </div></div>
+    </div>
+
+    <!-- KB-02 -->
+    <div class="page" id="page-kb02">
+      <div class="page-header"><span class="badge">KB-02</span><div class="page-title" style="display:inline">Kitverwendungsprotokoll</div><div class="page-sub">Protokoll über den Einsatz des Bombenentschärfungskits</div></div>
+      <div class="print-bar">
+        <button class="btn btn-outline" onclick="clearForm('kb02')">Leeren</button>
+        <button class="btn btn-primary" onclick="printPage('kb02')">&#128438; Drucken</button>
+      </div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">A – Allgemeine Angaben</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Datum</div><input type="date" class="field-input" id="k2-datum"></div>
+          <div><div class="field-label">Einsatznummer (Referenz KB-01)</div><input type="text" class="field-input" id="k2-ref"></div>
+          <div><div class="field-label">Verwendender Beamter</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="k2-beamter"></div>
+          <div><div class="field-label">Zertifizierungsnummer</div><input type="text" class="field-input" id="k2-zert"></div>
+          <div><div class="field-label">Kit-Seriennummer</div><input type="text" class="field-input" id="k2-serial"></div>
+          <div><div class="field-label">Kit-Version / Charge</div><input type="text" class="field-input" id="k2-version"></div>
+        </div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">B – Zustandsprüfung VOR dem Einsatz</span></div><div class="form-card-body">
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Prüfpunkt</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">OK</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Mangel</span></div>
+        <div id="cl-k2-vor"></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">C – Einsatzverwendung</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Uhrzeit Kit-Einsatz</div><input type="time" class="field-input" id="k2-uhr"></div>
+          <div><div class="field-label">Anzahl Auslösungen</div><input type="number" class="field-input" min="0" id="k2-ausl"></div>
+          <div><div class="field-label">Art des Kampfmittels</div><input type="text" class="field-input" id="k2-art"></div>
+          <div><div class="field-label">Entschärfung erfolgreich?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+        </div>
+        <div><div class="field-label">Besonderheiten</div><textarea class="field-input" id="k2-beson"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">D – Zustandsprüfung NACH dem Einsatz</span></div><div class="form-card-body">
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Prüfpunkt</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">OK</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Mangel</span></div>
+        <div id="cl-k2-nach"></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">E – Nachbestellung</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Nachbestellung erforderlich?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+          <div><div class="field-label">Bestellung veranlasst am</div><input type="date" class="field-input" id="k2-bestdat"></div>
+        </div>
+        <div><div class="field-label">Fehlende Komponenten</div><textarea class="field-input" id="k2-fehl"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">F – Unterschriften</span></div><div class="form-card-body">
+        <div class="sig-grid"><div><div class="sig-label">Verwendender Beamter</div><div class="sig-box"><input class="sig-input" id="sig-3" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-3').value=''">✕ Löschen</button></div></div><div><div class="sig-label">Gegenzeichnung KMBD-Leiter</div><div class="sig-box"><input class="sig-input" id="sig-4" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-4').value=''">✕ Löschen</button></div></div></div>
+      </div></div>
+    </div>
+
+    <!-- KB-03 -->
+    <div class="page" id="page-kb03">
+      <div class="page-header"><span class="badge">KB-03</span><div class="page-title" style="display:inline">Verletzungsprotokoll</div><div class="page-sub">Meldung und Dokumentation von Verletzungen im KMBD-Einsatz</div></div>
+      <div class="print-bar">
+        <button class="btn btn-outline" onclick="clearForm('kb03')">Leeren</button>
+        <button class="btn btn-primary" onclick="printPage('kb03')">&#128438; Drucken</button>
+      </div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">A – Einsatzbezug</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Datum des Vorfalls</div><input type="date" class="field-input" id="k3-datum"></div>
+          <div><div class="field-label">Uhrzeit</div><input type="time" class="field-input" id="k3-uhr"></div>
+          <div><div class="field-label">Einsatznummer (KB-01)</div><input type="text" class="field-input" id="k3-ref"></div>
+          <div><div class="field-label">Einsatzort</div><input type="text" class="field-input" id="k3-ort"></div>
+          <div><div class="field-label">Meldende Person</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="k3-melder"></div>
+          <div><div class="field-label">Dienststelle</div><input type="text" class="field-input" id="k3-stelle"></div>
+        </div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">B – Verletzte Person(en)</span></div><div class="form-card-body">
+        <div class="field-grid full" style="margin-bottom:10px"><div><div class="field-label">Name / Dienstgrad der verletzten Person</div><input type="text" class="field-input" id="k3-vname"></div></div>
+        <div class="field-grid">
+          <div><div class="field-label">Personengruppe</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> KMBD</label><label class="cb-item"><input type="checkbox"> Polizei</label><label class="cb-item"><input type="checkbox"> Zivil</label></div></div>
+          <div><div class="field-label">Schweregrad</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Leicht</label><label class="cb-item"><input type="checkbox"> Mittel</label><label class="cb-item"><input type="checkbox"> Schwer</label></div></div>
+        </div>
+        <div style="margin-top:10px"><div class="field-label">Verletzungsart</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Schnittverletzung</label><label class="cb-item"><input type="checkbox"> Verbrennung</label><label class="cb-item"><input type="checkbox"> Knochenbruch</label><label class="cb-item"><input type="checkbox"> Prellung</label><label class="cb-item"><input type="checkbox"> Sonstige</label></div></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">C – Unfallhergang</span></div><div class="form-card-body">
+        <div class="field-label">Unfallursache</div>
+        <div class="cb-row"><label class="cb-item"><input type="checkbox"> Kit-Fehlfunktion</label><label class="cb-item"><input type="checkbox"> Eigenverschulden</label><label class="cb-item"><input type="checkbox"> Fremdeinwirkung</label><label class="cb-item"><input type="checkbox"> Techn. Versagen</label><label class="cb-item"><input type="checkbox"> Sonstiges</label></div>
+        <div style="margin-top:10px"><div class="field-label">Ausführliche Beschreibung</div><textarea class="field-input" style="min-height:80px" id="k3-beschr"></textarea></div>
+        <div style="margin-top:8px"><div class="field-label">Protokolle eingehalten?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja – vollständig</label><label class="cb-item"><input type="checkbox"> Ja – teilweise</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+        <div style="margin-top:8px"><div class="field-label">Abweichungen</div><textarea class="field-input" id="k3-abw"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">D – Sofortmaßnahmen</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Notarzt alarmiert?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+          <div><div class="field-label">Uhrzeit Alarmierung</div><input type="time" class="field-input" id="k3-notuhr"></div>
+          <div><div class="field-label">Krankenhauseinweisung?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein – ambulant</label></div></div>
+          <div><div class="field-label">Einsatz abgebrochen?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+        </div>
+        <div><div class="field-label">Weitere Maßnahmen</div><textarea class="field-input" id="k3-mass"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">E – Unterschriften</span></div><div class="form-card-body">
+        <div class="sig-grid" style="grid-template-columns:1fr 1fr 1fr"><div><div class="sig-label">Meldende Person</div><div class="sig-box"><input class="sig-input" id="sig-5" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-5').value=''">✕ Löschen</button></div></div><div><div class="sig-label">Einsatzleiter KMBD</div><div class="sig-box"><input class="sig-input" id="sig-6" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-6').value=''">✕ Löschen</button></div></div><div><div class="sig-label">KMBD-Leiter</div><div class="sig-box"><input class="sig-input" id="sig-7" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-7').value=''">✕ Löschen</button></div></div></div>
+      </div></div>
+    </div>
+
+    <!-- KB-04 -->
+    <div class="page" id="page-kb04">
+      <div class="page-header"><span class="badge">KB-04</span><div class="page-title" style="display:inline">Ausbildungsnachweis</div><div class="page-sub">Nachweis der absolvierten KMBD-Ausbildungsphasen – nur für Ausbilder</div></div>
+      <div class="print-bar">
+        <button class="btn btn-outline" onclick="clearForm('kb04')">Leeren</button>
+        <button class="btn btn-primary" onclick="printPage('kb04')">&#128438; Drucken</button>
+      </div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">A – Angaben zum KMBD-Beamten</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Name</div><input type="text" class="field-input" placeholder="Nachname, Vorname" id="k4-name"></div>
+          <div><div class="field-label">Dienstgrad</div><input type="text" class="field-input" id="k4-grad"></div>
+          <div><div class="field-label">Dienstnummer</div><input type="text" class="field-input" id="k4-dnr"></div>
+          <div><div class="field-label">Dienststelle</div><input type="text" class="field-input" id="k4-stelle"></div>
+          <div><div class="field-label">Ausbildungsbeginn</div><input type="date" class="field-input" id="k4-begin"></div>
+          <div><div class="field-label">Zugewiesener Ausbilder</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="k4-ausb"></div>
+        </div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">B – Phase 1: Theorie & Grundwissen</span></div><div class="form-card-body">
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Thema</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">Best.</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Offen</span></div>
+        <div id="cl-k4-p1"></div>
+        <div class="field-grid" style="margin-top:12px">
+          <div><div class="field-label">Theorieprüfung abgelegt am</div><input type="date" class="field-input" id="k4-tdat"></div>
+          <div><div class="field-label">Ergebnis (mind. 75 %)</div><input type="number" min="0" max="100" class="field-input" placeholder="%" id="k4-terg"></div>
+        </div>
+        <div class="field-label">Phase 1 bestanden?</div>
+        <div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein – Wiederholung erforderlich</label></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">C – Phase 2: Praktische Grundübungen</span></div><div class="form-card-body">
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Übung</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">Best.</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Offen</span></div>
+        <div id="cl-k4-p2"></div>
+        <div class="field-label" style="margin-top:12px">Phase 2 bestanden?</div>
+        <div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja – alle Übungen bestanden</label><label class="cb-item"><input type="checkbox"> Nein – weitere Übungen erforderlich</label></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">D – Phase 3: Selbstständiger Prüfungseinsatz</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Datum des Prüfungseinsatzes</div><input type="date" class="field-input" id="k4-p3dat"></div>
+          <div><div class="field-label">Einsatznummer</div><input type="text" class="field-input" id="k4-p3nr"></div>
+          <div><div class="field-label">Beobachtender Ausbilder</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="k4-p3ausb"></div>
+          <div><div class="field-label">Einsatzort</div><input type="text" class="field-input" id="k4-p3ort"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px;margin-top:12px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Bewertungskriterium</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">Erf.</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Nicht</span></div>
+        <div id="cl-k4-p3"></div>
+        <div class="field-label" style="margin-top:12px">Phase 3 bestanden?</div>
+        <div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein – Wiederholung nach Nachschulung</label></div>
+        <div style="margin-top:10px"><div class="field-label">Gesamtbewertung / Notizen</div><textarea class="field-input" id="k4-notizen"></textarea></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">E – Unterschriften & Freigabe</span></div><div class="form-card-body">
+        <div class="sig-grid"><div><div class="sig-label">Ausbilder (Name, Dienstgrad)</div><div class="sig-box"><input class="sig-input" id="sig-8" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-8').value=''">✕ Löschen</button></div></div><div><div class="sig-label">KMBD-Leiter (Freigabe)</div><div class="sig-box"><input class="sig-input" id="sig-9" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-9').value=''">✕ Löschen</button></div></div></div>
+      </div></div>
+    </div>
+
+    <!-- KB-05 -->
+    <div class="page" id="page-kb05">
+      <div class="page-header"><span class="badge">KB-05</span><div class="page-title" style="display:inline">Prüfungsprotokoll</div><div class="page-sub">Abschlussprüfung KMBD-Grundausbildung – nur für Ausbilder</div></div>
+      <div class="print-bar">
+        <button class="btn btn-outline" onclick="clearForm('kb05')">Leeren</button>
+        <button class="btn btn-primary" onclick="printPage('kb05')">&#128438; Drucken</button>
+      </div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">A – Prüfungsdetails</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Prüfungsdatum</div><input type="date" class="field-input" id="k5-datum"></div>
+          <div><div class="field-label">Prüfungsort</div><input type="text" class="field-input" id="k5-ort"></div>
+        </div>
+        <div class="field-grid full"><div><div class="field-label">Prüfungskommission</div><input type="text" class="field-input" placeholder="Namen aller Prüfer" id="k5-kom"></div></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">B – Prüfling</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Name</div><input type="text" class="field-input" placeholder="Nachname, Vorname" id="k5-name"></div>
+          <div><div class="field-label">Dienstgrad</div><input type="text" class="field-input" id="k5-grad"></div>
+          <div><div class="field-label">Dienstnummer</div><input type="text" class="field-input" id="k5-dnr"></div>
+          <div><div class="field-label">KB-04 vorgelegt am</div><input type="date" class="field-input" id="k5-kb04dat"></div>
+        </div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">C – Theoretischer Prüfungsteil</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Prüfungsuhrzeit</div><input type="time" class="field-input" id="k5-uhr"></div>
+          <div><div class="field-label">Erreichte Punkte (von 20)</div><input type="number" min="0" max="20" class="field-input" placeholder="0" id="k5-punkte"></div>
+          <div><div class="field-label">Ergebnis in Prozent</div><input type="number" min="0" max="100" class="field-input" placeholder="%" id="k5-proz"></div>
+          <div><div class="field-label">Theorie bestanden? (mind. 75 %)</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px;margin-top:8px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Themenbereich</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">Best.</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Nicht</span></div>
+        <div id="cl-k5-th"></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">D – Praktischer Prüfungsteil</span></div><div class="form-card-body">
+        <div class="field-grid">
+          <div><div class="field-label">Datum</div><input type="date" class="field-input" id="k5-pdat"></div>
+          <div><div class="field-label">Einsatznummer (KB-01)</div><input type="text" class="field-input" id="k5-pnr"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr 80px 80px;padding-bottom:6px;border-bottom:2px solid #EBF0F8;margin-bottom:4px;margin-top:8px"><span></span><span style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase">Bewertungskriterium</span><span style="font-size:11px;font-weight:700;color:#68d391;text-align:center">Erf.</span><span style="font-size:11px;font-weight:700;color:#fc8181;text-align:center">Nicht</span></div>
+        <div id="cl-k5-pr"></div>
+        <div class="field-grid" style="margin-top:12px">
+          <div><div class="field-label">Gesamtpunktzahl Praxis (von 40)</div><input type="number" min="0" max="40" class="field-input" placeholder="0" id="k5-gpunkt"></div>
+          <div><div class="field-label">Praxis bestanden?</div><div class="cb-row"><label class="cb-item"><input type="checkbox"> Ja</label><label class="cb-item"><input type="checkbox"> Nein</label></div></div>
+        </div>
+        <div class="field-label">Schwere Fehler?</div>
+        <div class="cb-row"><label class="cb-item"><input type="checkbox"> Keine</label><label class="cb-item"><input type="checkbox"> 1 schwerer Fehler (nicht bestanden)</label></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">E – Gesamtergebnis</span></div><div class="form-card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div style="background:#0f2d1a;border-radius:8px;padding:14px;cursor:pointer" onclick="toggleResult('best')"><label class="cb-item" style="background:transparent;border:none;padding:0;font-size:14px;font-weight:600;color:#68d391"><input type="checkbox" id="res-best" style="accent-color:#68d391"> BESTANDEN – Zertifikat wird ausgestellt</label></div>
+          <div style="background:#2d1515;border-radius:8px;padding:14px;cursor:pointer" onclick="toggleResult('nein')"><label class="cb-item" style="background:transparent;border:none;padding:0;font-size:14px;font-weight:600;color:#fc8181"><input type="checkbox" id="res-nein" style="accent-color:#fc8181"> NICHT BESTANDEN – Wiederholung nach Nachschulung</label></div>
+        </div>
+        <div><div class="field-label">Anmerkungen der Prüfungskommission</div><textarea class="field-input" id="k5-anm"></textarea></div>
+        <div style="margin-top:8px"><div class="field-label">Zertifikatsnummer (bei Bestehen)</div><input type="text" class="field-input" placeholder="wird nach Ausstellung eingetragen" id="k5-zert"></div>
+      </div></div>
+      <div class="form-card"><div class="form-card-header"><span class="form-card-title">F – Unterschriften</span></div><div class="form-card-body">
+        <div class="sig-grid"><div><div class="sig-label">1. Prüfer (Name, Dienstgrad)</div><div class="sig-box"><input class="sig-input" id="sig-10" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-10').value=''">✕ Löschen</button></div></div><div><div class="sig-label">2. Prüfer / KMBD-Leiter</div><div class="sig-box"><input class="sig-input" id="sig-11" type="text" placeholder="Hier unterschreiben..."><button class="sig-clear" onclick="document.getElementById('sig-11').value=''">✕ Löschen</button></div></div></div>
+      </div></div>
+    </div>
+
+    <!-- BENUTZERVERWALTUNG -->
+    <div class="page" id="page-benutzer">
+      <div class="page-header">
+        <div class="page-title">Benutzerverwaltung</div>
+        <div class="page-sub">Zugänge für KMBD-Beamte anlegen und verwalten – nur für Ausbilder sichtbar</div>
+      </div>
+      <div class="print-bar">
+        <button class="btn btn-primary" onclick="openUserModal()">+ Neuen Zugang anlegen</button>
+      </div>
+      <div class="form-card">
+        <div class="form-card-header"><span class="form-card-title">Bestehende Zugänge</span></div>
+        <div class="form-card-body" style="padding:0">
+          <table style="width:100%;border-collapse:collapse;font-size:13px" id="users-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONALAKTEN -->
+    <div class="page" id="page-personalakten">
+      <div class="page-header">
+        <div class="page-title">Personalakten</div>
+        <div class="page-sub">Ausbildungsverlauf und Verhaltenseinträge der KMBD-Beamten – nur für Ausbilder sichtbar</div>
+      </div>
+      <div id="personalakten-list-view">
+        <div class="print-bar">
+          <button class="btn btn-primary" onclick="openNewAkteModal()">+ Neue Personalakte anlegen</button>
+        </div>
+        <div class="form-card">
+          <div class="form-card-header"><span class="form-card-title">Beamte mit Personalakte</span></div>
+          <div class="form-card-body" style="padding:0">
+            <table style="width:100%;border-collapse:collapse;font-size:13px" id="akten-table"></table>
+          </div>
+        </div>
+      </div>
+      <div id="personalakte-detail-view" style="display:none">
+        <div class="print-bar" style="justify-content:space-between">
+          <button class="btn btn-outline" onclick="showAktenListView()">&larr; Zurück zur Übersicht</button>
+          <button class="btn" style="background:#3d2528;color:#e5989b;border-color:#5c2e30" onclick="deletePersonalakte()">Personalakte löschen</button>
+        </div>
+        <div class="form-card">
+          <div class="form-card-header"><span class="form-card-title" id="akte-detail-name">Personalakte</span></div>
+          <div class="form-card-body">
+            <div class="field-grid">
+              <div><div class="field-label">Name / Dienstgrad</div><input type="text" class="field-input" id="akte-name" placeholder="Nachname, Vorname"></div>
+              <div><div class="field-label">Zugehöriger Login</div><input type="text" class="field-input" id="akte-login" readonly></div>
+            </div>
+            <div class="field-grid">
+              <div><div class="field-label">Dienstnummer</div><input type="text" class="field-input" id="akte-dnr"></div>
+              <div><div class="field-label">Status</div>
+                <div class="cb-row" id="akte-status">
+                  <label class="cb-item"><input type="radio" name="akte-status-r" value="Anwärter"> Anwärter</label>
+                  <label class="cb-item"><input type="radio" name="akte-status-r" value="Zertifiziert"> Zertifiziert</label>
+                  <label class="cb-item"><input type="radio" name="akte-status-r" value="Suspendiert"> Suspendiert</label>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveAkteStammdaten()">Stammdaten speichern</button>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-card-header"><span class="form-card-title">Ausbildungs- und Verhaltenseinträge</span></div>
+          <div class="form-card-body">
+            <div class="field-grid">
+              <div><div class="field-label">Art des Eintrags</div>
+                <div class="cb-row" id="eintrag-art">
+                  <label class="cb-item"><input type="radio" name="eintrag-art-r" value="Ausbildung"> Ausbildung</label>
+                  <label class="cb-item"><input type="radio" name="eintrag-art-r" value="Lob"> Lob / Anerkennung</label>
+                  <label class="cb-item"><input type="radio" name="eintrag-art-r" value="Fehlverhalten"> Fehlverhalten</label>
+                </div>
+              </div>
+              <div><div class="field-label">Datum</div><input type="date" class="field-input" id="eintrag-datum"></div>
+            </div>
+            <div class="field-grid full">
+              <div><div class="field-label">Beschreibung</div><textarea class="field-input" id="eintrag-text" placeholder="z.B. Theorieprüfung Phase 1 bestanden mit 90%, oder: Verstoß gegen Sicherheitsabstand bei Einsatz KMBD-2026-014"></textarea></div>
+            </div>
+            <div class="field-grid full">
+              <div><div class="field-label">Eintragender Ausbilder</div><input type="text" class="field-input" placeholder="Name, Dienstgrad" id="eintrag-ausbilder"></div>
+            </div>
+            <button class="btn btn-primary" onclick="addPersonalakteEintrag()">Eintrag hinzufügen</button>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-card-header"><span class="form-card-title">Verlauf dieser Personalakte</span></div>
+          <div class="form-card-body" id="akte-eintraege-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KAMPFMITTEL -->
+    <div class="page" id="page-kampfmittel">
+      <div class="page-header"><div class="page-title">Kampfmittel-Nachschlagewerk</div><div class="page-sub">Klicke auf eine Karte für Details – Erkennungsmerkmale, Sofortverhalten und Kit-Eignung</div></div>
+      <div class="km-grid" id="km-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const USERS = {
+  kmbd:     {pass:'ausbilder1', role:'Ausbilder',    kmAccess:true,  allForms:true, isAusbilder:true},
+  beamter:  {pass:'kmbd123',   role:'KMBD Beamter', kmAccess:true,  allForms:false, isAusbilder:false}
+};
+
+// Personalakten: jede Akte hat eine eigene ID, optional verknüpft mit einem Login (loginUser)
+let nextAkteId = 1;
+const PERSONALAKTEN = {};
+PERSONALAKTEN[nextAkteId++] = { name:'', dnr:'', status:'Anwärter', eintraege:[], loginUser:'beamter' };
+
+let nextEintragId = 1;
+let currentAkteId = null;
+
+let currentUser = null;
+
+function doLogin(){
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const user = USERS[u];
+  if(user && user.pass === p){
+    currentUser = {name:u, ...user};
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('sidebar-user').textContent = u + ' · ' + currentUser.role;
+    document.getElementById('dash-role').textContent = currentUser.role;
+    if(currentUser.allForms){
+      document.getElementById('nav-kb04').style.display='flex';
+      document.getElementById('nav-kb05').style.display='flex';
+      document.getElementById('sec-ausbilder').style.display='block';
+      document.getElementById('dash-kb04-card').style.display='block';
+      document.getElementById('dash-kb05-card').style.display='block';
+      document.getElementById('dash-form-count').textContent='5';
+    } else {
+      document.getElementById('dash-form-count').textContent='3 + Lexikon';
+    }
+    if(currentUser.isAusbilder){
+      document.getElementById('nav-benutzer').style.display='flex';
+      document.getElementById('nav-personalakten').style.display='flex';
+      renderUsersTable();
+      renderAktenTable();
+    }
+    document.getElementById('login-error').style.display='none';
+    initChecklists();
+    initKampfmittel();
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+function showPage(id, el){
+  if((id==='kb04' || id==='kb05' || id==='benutzer' || id==='personalakten') && !currentUser.isAusbilder && !currentUser.allForms){
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='benutzer') renderUsersTable();
+  if(id==='personalakten') { showAktenListView(); renderAktenTable(); }
+}
+
+/* ===== BENUTZERVERWALTUNG ===== */
+function renderUsersTable(){
+  const table = document.getElementById('users-table');
+  const rows = Object.keys(USERS).map(uname=>{
+    const u = USERS[uname];
+    const roleTag = u.isAusbilder ? '<span class="badge">Ausbilder</span>' : '<span class="badge" style="background:#1c2933;color:#7da6c9">KMBD Beamter</span>';
+    const delBtn = u.isAusbilder ? '' : '<button class="btn btn-outline" style="padding:4px 10px;font-size:11px" onclick="deleteUser(&apos;'+uname+'&apos;)">Zugang entfernen</button>';
+    return '<tr style="border-bottom:1px solid #262c34">'
+      +'<td style="padding:10px 14px;color:#e6edf3;font-weight:600">'+uname+'</td>'
+      +'<td style="padding:10px 14px">'+roleTag+'</td>'
+      +'<td style="padding:10px 14px;color:#6e7681">'+(u.pass)+'</td>'
+      +'<td style="padding:10px 14px;text-align:right">'+delBtn+'</td>'
+      +'</tr>';
+  }).join('');
+  table.innerHTML = '<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Benutzername</th><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Rolle</th><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Passwort</th><th></th></tr>' + rows;
+}
+
+function openUserModal(){
+  document.getElementById('nu-username').value='';
+  document.getElementById('nu-password').value='';
+  document.getElementById('nu-fullname').value='';
+  document.getElementById('user-modal-overlay').style.display='flex';
+}
+function closeUserModal(){ document.getElementById('user-modal-overlay').style.display='none'; }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+
+function showConfirm(message, onYes){
+  document.getElementById('confirm-message').textContent = message;
+  document.getElementById('confirm-overlay').style.display = 'flex';
+  const btn = document.getElementById('confirm-yes-btn');
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', function(){
+    closeConfirm();
+    onYes();
+  });
+}
+
+function closeConfirm(){
+  document.getElementById('confirm-overlay').style.display='none';
+}
+
+function saveNewUser(){
+  const uname = document.getElementById('nu-username').value.trim().toLowerCase();
+  const pass = document.getElementById('nu-password').value.trim();
+  const fullname = document.getElementById('nu-fullname').value.trim();
+  if(!uname || !pass){ showToast('Bitte Benutzername und Passwort vergeben.'); return; }
+  if(USERS[uname]){ showToast('Dieser Benutzername existiert bereits.'); return; }
+  USERS[uname] = {pass:pass, role:'KMBD Beamter', kmAccess:true, allForms:false, isAusbilder:false};
+  const akteId = nextAkteId++;
+  PERSONALAKTEN[akteId] = {name:fullname, dnr:'', status:'Anwärter', eintraege:[], loginUser:uname};
+  closeUserModal();
+  renderUsersTable();
+  renderAktenTable();
+}
+
+function deleteUser(uname){
+  showConfirm('Zugang "'+uname+'" wirklich entfernen? Die zugehörige Personalakte bleibt erhalten, wird aber vom Login getrennt.', function(){
+    delete USERS[uname];
+    Object.keys(PERSONALAKTEN).forEach(id=>{
+      if(PERSONALAKTEN[id].loginUser === uname) PERSONALAKTEN[id].loginUser = '';
+    });
+    renderUsersTable();
+    renderAktenTable();
+    showToast('Zugang wurde entfernt.');
+  });
+}
+
+/* ===== PERSONALAKTEN ===== */
+function renderAktenTable(){
+  const table = document.getElementById('akten-table');
+  const ids = Object.keys(PERSONALAKTEN);
+  if(ids.length===0){
+    table.innerHTML = '<tr><td style="padding:16px;color:#6e7681">Noch keine Personalakten vorhanden. Lege eine neue Akte an oder erstelle einen Zugang in der Benutzerverwaltung.</td></tr>';
+    return;
+  }
+  const rows = ids.map(id=>{
+    const a = PERSONALAKTEN[id];
+    const statusColor = a.status==='Suspendiert' ? 'color:#e5989b' : a.status==='Zertifiziert' ? 'color:#7fc99a' : 'color:#7da6c9';
+    const loginDisplay = a.loginUser ? a.loginUser : '<span style="color:#586069">kein Login</span>';
+    return '<tr style="border-bottom:1px solid #262c34;cursor:pointer" onclick="openAkte('+id+')">'
+      +'<td style="padding:10px 14px;color:#e6edf3;font-weight:600">'+(a.name||'(ohne Namen)')+'</td>'
+      +'<td style="padding:10px 14px;color:#6e7681">'+loginDisplay+'</td>'
+      +'<td style="padding:10px 14px;'+statusColor+'">'+a.status+'</td>'
+      +'<td style="padding:10px 14px;color:#6e7681">'+a.eintraege.length+' Einträge</td>'
+      +'<td style="padding:10px 14px;text-align:right"><button class="btn btn-outline" style="padding:4px 10px;font-size:11px">Öffnen</button></td>'
+      +'</tr>';
+  }).join('');
+  table.innerHTML = '<tr style="border-bottom:1px solid #30363d"><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Name</th><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Login</th><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Status</th><th style="text-align:left;padding:10px 14px;font-size:11px;color:#6e7681;text-transform:uppercase">Verlauf</th><th></th></tr>' + rows;
+}
+
+function openNewAkteModal(){
+  document.getElementById('na-name').value='';
+  document.getElementById('na-dnr').value='';
+  const sel = document.getElementById('na-login');
+  const usedLogins = Object.keys(PERSONALAKTEN).map(id=>PERSONALAKTEN[id].loginUser).filter(Boolean);
+  const availableLogins = Object.keys(USERS).filter(u=>!USERS[u].isAusbilder && !usedLogins.includes(u));
+  sel.innerHTML = '<option value="">Kein Login zuordnen</option>' + availableLogins.map(u=>'<option value="'+u+'">'+u+'</option>').join('');
+  document.getElementById('akte-modal-overlay').style.display='flex';
+}
+
+function closeNewAkteModal(){ document.getElementById('akte-modal-overlay').style.display='none'; }
+
+function saveNewAkte(){
+  const name = document.getElementById('na-name').value.trim();
+  const dnr = document.getElementById('na-dnr').value.trim();
+  const login = document.getElementById('na-login').value;
+  if(!name){ showToast('Bitte einen Namen eingeben.'); return; }
+  const akteId = nextAkteId++;
+  PERSONALAKTEN[akteId] = {name, dnr, status:'Anwärter', eintraege:[], loginUser:login};
+  closeNewAkteModal();
+  renderAktenTable();
+}
+
+function deletePersonalakte(){
+  if(!currentAkteId) return;
+  showConfirm('Diese Personalakte inklusive des gesamten Verlaufs wirklich unwiderruflich löschen?', function(){
+    delete PERSONALAKTEN[currentAkteId];
+    currentAkteId = null;
+    showAktenListView();
+    renderAktenTable();
+    showToast('Personalakte wurde gelöscht.');
+  });
+}
+
+function openAkte(id){
+  currentAkteId = id;
+  const a = PERSONALAKTEN[id];
+  document.getElementById('akte-detail-name').textContent = 'Personalakte – ' + (a.name||'(ohne Namen)');
+  document.getElementById('akte-name').value = a.name||'';
+  document.getElementById('akte-login').value = a.loginUser || '(kein Login zugeordnet)';
+  document.getElementById('akte-dnr').value = a.dnr||'';
+  document.querySelectorAll('input[name="akte-status-r"]').forEach(r=>{ r.checked = (r.value===a.status); });
+  renderAkteEintraege();
+  document.getElementById('personalakten-list-view').style.display='none';
+  document.getElementById('personalakte-detail-view').style.display='block';
+}
+
+function showAktenListView(){
+  currentAkteId = null;
+  document.getElementById('personalakten-list-view').style.display='block';
+  document.getElementById('personalakte-detail-view').style.display='none';
+}
+
+function saveAkteStammdaten(){
+  if(!currentAkteId) return;
+  const a = PERSONALAKTEN[currentAkteId];
+  a.name = document.getElementById('akte-name').value.trim();
+  a.dnr = document.getElementById('akte-dnr').value.trim();
+  const statusEl = document.querySelector('input[name="akte-status-r"]:checked');
+  if(statusEl) a.status = statusEl.value;
+  showToast('Stammdaten gespeichert.');
+  renderAktenTable();
+}
+
+function addPersonalakteEintrag(){
+  if(!currentAkteId) return;
+  const artEl = document.querySelector('input[name="eintrag-art-r"]:checked');
+  const art = artEl ? artEl.value : '';
+  const datum = document.getElementById('eintrag-datum').value;
+  const text = document.getElementById('eintrag-text').value.trim();
+  const ausbilder = document.getElementById('eintrag-ausbilder').value.trim();
+  if(!art || !datum || !text || !ausbilder){
+    showToast('Bitte Art, Datum, Beschreibung und eintragenden Ausbilder ausfüllen.');
+    return;
+  }
+  PERSONALAKTEN[currentAkteId].eintraege.push({id:nextEintragId++, art, datum, text, ausbilder});
+  document.getElementById('eintrag-text').value='';
+  document.getElementById('eintrag-ausbilder').value='';
+  if(artEl) artEl.checked=false;
+  renderAkteEintraege();
+  renderAktenTable();
+}
+
+function deletePersonalakteEintrag(id){
+  if(!currentAkteId) return;
+  showConfirm('Diesen Eintrag wirklich löschen?', function(){
+    const a = PERSONALAKTEN[currentAkteId];
+    a.eintraege = a.eintraege.filter(e=>e.id!==id);
+    renderAkteEintraege();
+    renderAktenTable();
+    showToast('Eintrag wurde gelöscht.');
+  });
+}
+
+function renderAkteEintraege(){
+  if(!currentAkteId) return;
+  const a = PERSONALAKTEN[currentAkteId];
+  const list = document.getElementById('akte-eintraege-list');
+  if(a.eintraege.length===0){
+    list.innerHTML = '<div style="color:#6e7681;font-size:13px;padding:8px 0">Noch keine Einträge vorhanden.</div>';
+    return;
+  }
+  const sorted = a.eintraege.slice().sort((x,y)=> y.datum.localeCompare(x.datum));
+  list.innerHTML = sorted.map(e=>{
+    const tagClass = e.art==='Fehlverhalten' ? 'tag-red' : e.art==='Lob' ? 'tag-green' : 'tag-blue';
+    return '<div style="border-bottom:1px solid #262c34;padding:10px 0;display:flex;gap:12px;align-items:flex-start">'
+      +'<span class="info-tag '+tagClass+'" style="flex-shrink:0;margin-top:2px">'+e.art+'</span>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12.5px;color:#c9d1d9">'+e.text+'</div>'
+      +'<div style="font-size:11px;color:#6e7681;margin-top:4px">'+formatDateDE(e.datum)+' &middot; eingetragen von '+e.ausbilder+'</div>'
+      +'</div>'
+      +'<button class="btn btn-outline" style="padding:3px 8px;font-size:11px;flex-shrink:0" onclick="deletePersonalakteEintrag('+e.id+')">Löschen</button>'
+      +'</div>';
+  }).join('');
+}
+
+function formatDateDE(d){
+  if(!d) return '';
+  const parts = d.split('-');
+  return parts[2]+'.'+parts[1]+'.'+parts[0];
+}
+
+function printPage(formId){
+  // Hide all pages, show only target, print, restore
+  const allPages = document.querySelectorAll('.page');
+  const target = document.getElementById('page-'+formId);
+  allPages.forEach(p=>{ if(p!==target) p.style.setProperty('display','none','important'); });
+  target.style.setProperty('display','block','important');
+  window.print();
+  // Restore after print dialog closes
+  setTimeout(()=>{
+    allPages.forEach(p=>p.style.removeProperty('display'));
+    target.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>{ if(p!==target) p.classList.remove('active'); });
+  }, 500);
+}
+
+function clearForm(id){
+  document.getElementById('page-'+id).querySelectorAll('input,textarea').forEach(el=>{
+    if(el.type==='checkbox') el.checked=false;
+    else el.value='';
+  });
+}
+
+function toggleResult(which){
+  const b=document.getElementById('res-best'), n=document.getElementById('res-nein');
+  if(which==='best'){ b.checked=!b.checked; n.checked=false; }
+  else { n.checked=!n.checked; b.checked=false; }
+}
+
+function buildChecklist(id, items){
+  const c=document.getElementById(id); if(!c) return;
+  c.innerHTML=items.map((item,i)=>`<div class="checklist-row"><span class="cl-num">${i+1}.</span><span class="cl-text">${item}</span><div class="cl-check"><input type="checkbox" style="accent-color:#68d391"></div><div class="cl-check"><input type="checkbox" style="accent-color:#fc8181"></div></div>`).join('');
+}
+
+function buildScoreChecklist(id, items, max){
+  const c=document.getElementById(id); if(!c) return;
+  c.innerHTML=items.map((item,i)=>`<div class="checklist-row" style="grid-template-columns:30px 1fr 110px"><span class="cl-num">${i+1}.</span><span class="cl-text">${item}</span><div style="display:flex;align-items:center;gap:4px;justify-content:flex-end"><input type="number" min="0" max="${max}" placeholder="0" style="width:48px;padding:4px 6px;border:1px solid #2d3748;border-radius:4px;background:#0f1117;color:#e2e8f0;font-size:13px;text-align:center"> / ${max} richtig</div></div>`).join('');
+}
+
+function initChecklists(){
+  buildChecklist('cl-k2-vor',['Hauptmodul vorhanden und unbeschädigt','Auslösemechanismus funktionsfähig','Schutzfolie vollständig und unbeschädigt','Diagnosesonde einsatzbereit','Werkzeugset vollständig','Verfallsdatum aller Komponenten geprüft','Transportbehälter unbeschädigt']);
+  buildChecklist('cl-k2-nach',['Hauptmodul verwendet / verbraucht?','Auslösemechanismus noch funktionsfähig?','Schutzfolie noch verwendbar?','Werkzeugset vollständig zurückgegeben?','Transportbehälter gereinigt und verstaut?']);
+  buildChecklist('cl-k4-p1',['Geschichte des KMBD und gesetzliche Grundlagen','Arten von Kampfmitteln und Sprengvorrichtungen','Aufbau und Funktion des Bombenentschärfungskits','Sicherheitsabstände und Sperrzonenerrichtung','Funkkommunikation im Einsatz','Dokumentation und Berichterstattung','Zusammenarbeit mit Feuerwehr, SEK, THW']);
+  buildChecklist('cl-k4-p2',['Sperrzone aufbauen und sichern','Lageerkundung und Leitstellenkommunikation','Annäherung an Kampfmittel nach Protokoll','Bedienung Bombenentschärfungskit (unter Aufsicht)','Einsatzdokumentation erstellen']);
+  buildChecklist('cl-k4-p3',['Alle Sicherheitsabstände eingehalten','Korrekte Kommunikation mit Leitstelle','Fehlerfreier Einsatz des Bombenentschärfungskits','Ruhe und professionelles Auftreten','Vollständige Nachbesprechung und Dokumentation']);
+  buildScoreChecklist('cl-k5-th',['Sicherheitsprotokolle','Bombenentschärfungskit','Einsatzabläufe','Sperrzonenerrichtung','Kommunikation & Dokumentation'], 4);
+  buildChecklist('cl-k5-pr',['Sicherheitsabstände eingehalten (Pflichtkriterium)','Korrekte Leitstellenkommunikation (20 %)','Fehlerfreier Kit-Einsatz (30 %)','Professionelles Auftreten / Ruhe (20 %)','Nachbesprechung & Dokumentation (30 %)']);
+}
+
+const KM=[
+  {icon:'💣',farbe:'#FAEEDA',label:'IED – Improvisierter Sprengkörper',sub:'Improvised Explosive Device',gefahr:'hoch',typ:'Sprengmittel',herkunft:'Selbst gebaut',kit:true,
+   erkennung:['Ungewöhnliche Verkabelung sichtbar','Verdächtige Behälter (Koffer, Rucksack, Rohr)','Drähte oder Auslöser erkennbar','Ungewöhnlicher chemischer Geruch'],
+   verhalten:['Sofort Bereich verlassen – mind. 200 m','Keine Funkgeräte in der Nähe','Keine Erschütterungen verursachen','KMBD und Leitstelle sofort alarmieren'],
+   info:'IEDs sind die häufigste Bedrohung. Sehr variabel in Form und Auslösemechanismus. Besondere Vorsicht bei sekundären Sprengvorrichtungen.'},
+  {icon:'⚠️',farbe:'#FAEAEA',label:'Artilleriemunition (Weltkrieg)',sub:'Blindgänger WK I / WK II',gefahr:'hoch',typ:'Historische Munition',herkunft:'Militär WK I / WK II',kit:false,
+   erkennung:['Zylindrische Metallkörper im Boden','Rostiger verformter Metallkörper','Fin-Stabilisierung sichtbar','Oft bei Erdbewegungsarbeiten gefunden'],
+   verhalten:['Objekt nicht berühren oder bewegen','Bereich absichern – mind. 100 m','Baustelle sofort einstellen','KMBD und Leitstelle alarmieren'],
+   info:'Historische Blindgänger sind nach wie vor instabil. Kein Kit-Einsatz möglich – kontrollierte Sprengung oder Abtransport.'},
+  {icon:'📦',farbe:'#EBF0F8',label:'Verdächtiges Paket',sub:'Unbekannter Inhalt / möglicher Sprengstoff',gefahr:'mittel',typ:'Unbekannt',herkunft:'Unbekannt',kit:true,
+   erkennung:['Herrenloses Objekt an öffentlichem Ort','Ungewöhnliche Geräusche (Ticken, Summen)','Sichtbare Kabel oder Drähte','Versteckt oder abgesondert platziert'],
+   verhalten:['Paket nicht berühren oder öffnen','Gebäude evakuieren','Klimaanlage abstellen','KMBD alarmieren und Lageeinschätzung abwarten'],
+   info:'Immer vom Schlimmsten ausgehen bis zum Beweis des Gegenteils. Falschalarme sind kein Fehler – Leichtsinn schon.'},
+  {icon:'🔴',farbe:'#FAEAEA',label:'Handgranate',sub:'Splitter- oder Brandgranate',gefahr:'hoch',typ:'Handwurfmunition',herkunft:'Militär / Kriminell',kit:true,
+   erkennung:['Typische ovale oder zylindrische Form','Splitterstruktur auf Außenhülle','Sicherungsstift / Hebel erkennbar','Oft orange-rote Markierung (Übungsgranate)'],
+   verhalten:['Mindestabstand 50 m','Keine plötzlichen Bewegungen','Zivilisten sofort in Deckung','KMBD alarmieren – Kit-Einsatz möglich'],
+   info:'Handgranaten können auch ohne sichtbaren Auslöser aktiv sein. Übungsgranaten sehen identisch aus – immer als scharf behandeln.'},
+  {icon:'🧪',farbe:'#EAF4EA',label:'CBRN-Verdacht',sub:'Chemisch / Biologisch / Radiologisch / Nuklear',gefahr:'hoch',typ:'ABC-Gefahr',herkunft:'Variabel',kit:false,
+   erkennung:['Unbekannte Flüssigkeiten oder Pulver','Mehrere Personen gleichzeitig erkrankt','Ungewöhnlicher Geruch ohne Quelle','Auffällige Behälter mit Warnsymbolen'],
+   verhalten:['Bereich verlassen – Windrichtung beachten','Keine Berührung ohne Schutzausrüstung','Kontaminierte Personen isolieren','Feuerwehr CBRN + KMBD + Notarzt alarmieren'],
+   info:'Bei CBRN-Verdacht ist der KMBD nur unterstützend. Federführend ist die Feuerwehr CBRN-Einheit. Eigensicherung hat absoluten Vorrang.'},
+  {icon:'💡',farbe:'#FAEEDA',label:'Rohrbombe',sub:'Improvisierter Rohrsprengsatz',gefahr:'hoch',typ:'Sprengmittel',herkunft:'Selbst gebaut',kit:true,
+   erkennung:['Metallrohr mit verschlossenen Enden','Kabel oder Zündschnur erkennbar','Abnormales Gewicht für die Größe','Oft an Fahrzeugen oder Gebäuden befestigt'],
+   verhalten:['Mindestabstand 100 m','Kein Funkkontakt in der Nähe','Fahrzeuge aus Gefahrenbereich entfernen wenn sicher','KMBD alarmieren – Kit-Einsatz möglich'],
+   info:'Rohrbomben sind einfach herzustellen. Splitterwirkung erheblich. Auslöser oft Zeitschalter, Fernzündung oder Drucksensor.'},
+  {icon:'🚗',farbe:'#FAEAEA',label:'VBIED – Fahrzeugbombe',sub:'Vehicle-Borne IED',gefahr:'hoch',typ:'Sprengmittel',herkunft:'Kriminell / Terroristisch',kit:false,
+   erkennung:['Fahrzeug ohne Fahrer in Sperrbereich','Tief liegendes Fahrzeug durch Gewicht','Kabel durch Fenster oder Türspalten','Fahrzeug wurde abrupt verlassen'],
+   verhalten:['Mindestabstand 300 bis 500 m','Gesamten Block evakuieren','Kein Betreten des Fahrzeugs','KMBD und SEK und Leitstelle alarmieren'],
+   info:'Fahrzeugbomben enthalten sehr große Sprengstoffmengen. Druckwelle kann Gebäude in 100 m und mehr beschädigen. Entschärfung nur durch Spezialroboter.'},
+  {icon:'⚙️',farbe:'#EBF0F8',label:'Munition (modern)',sub:'Patronen / Magazin / Kleinkalibermunition',gefahr:'mittel',typ:'Schussmunition',herkunft:'Militär / Polizei / Kriminell',kit:false,
+   erkennung:['Einzelne Patronen oder Magazine','Metallisch glänzende Hülsen','Typische Patronenform erkennbar','Oft bei Hausdurchsuchungen gefunden'],
+   verhalten:['Munition nicht berühren','Bereich sichern','Keine offenen Flammen','KMBD oder Waffensachverständigen hinzuziehen'],
+   info:'Lose Munition ist meist stabil und stellt kein unmittelbares Sprengrisiko dar. Kein Eigentransport ohne Genehmigung.'},
+  {icon:'🔫',farbe:'#EBF0F8',label:'Booby-Trap / Falle',sub:'Waffe mit versteckter Sprengvorrichtung',gefahr:'hoch',typ:'Falle',herkunft:'Kriminell',kit:true,
+   erkennung:['Waffe in auffälliger Position','Versteckte Drähte oder Auslöser','Türen oder Fenster mit Fäden gesichert','Ungewöhnlich platzierte Alltagsgegenstände'],
+   verhalten:['Nichts anfassen oder bewegen','Raum sofort verlassen','Türen und Fenster NICHT öffnen','KMBD alarmieren'],
+   info:'Booby-Traps werden bewusst zum Verwunden von Beamten platziert. Besondere Vorsicht bei Hausdurchsuchungen und verlassenen Gebäuden.'},
+  {icon:'🌊',farbe:'#EBF0F8',label:'Wassergebundene Kampfmittel',sub:'Seeminen / Unterwassersprengkörper',gefahr:'hoch',typ:'Marine-Munition',herkunft:'Militär (historisch)',kit:false,
+   erkennung:['Rundliche Metallkörper im oder am Wasser','Ankerketten sichtbar','Typische Hornzünder erkennbar','Sehr schwer und rostig'],
+   verhalten:['Wasser sperren 200 m Radius','Bootsverkehr einstellen','Kein Kontakt mit dem Objekt','KMBD und Kampfschwimmer alarmieren'],
+   info:'Historische Seeminen sind extrem gefährlich. Bergung nur durch Kampfschwimmer. KMBD koordiniert nur die Landsicherung.'},
+  {icon:'🏭',farbe:'#FAEEDA',label:'Sprengstoff (lose)',sub:'TNT / TATP / Schwarzpulver',gefahr:'hoch',typ:'Explosivstoffe',herkunft:'Industriell / Selbst hergestellt',kit:false,
+   erkennung:['Weißes oder gelbliches Pulver oder Blöcke','Starker chemischer Geruch','Kristalline Struktur bei TATP','Auffällige Verpackung oder Lagerung'],
+   verhalten:['Raum sofort verlassen keine Erschütterungen','Keine Elektrogeräte wegen Funken','Keine Beleuchtung schalten','KMBD und Feuerwehr alarmieren'],
+   info:'Lose Explosivstoffe sind extrem empfindlich. TATP ist besonders flüchtig und gefährlich. Nur KMBD mit Vollschutz darf den Bereich betreten.'},
+  {icon:'📡',farbe:'#EBF0F8',label:'RCIED – Ferngezündeter Sprengsatz',sub:'Radio-Controlled IED',gefahr:'hoch',typ:'IED mit Fernzündung',herkunft:'Kriminell / Terroristisch',kit:true,
+   erkennung:['Sichtbare Antenne am Sprengsatz','Handykomponenten oder Funkempfänger','Oft versteckt an Straßenrändern','Keine sichtbaren Kabel zur Umgebung'],
+   verhalten:['Funkkommunikation sofort einstellen','Alle Mobiltelefone ausschalten 200 m Radius','KMBD mit Störsender anfordern','Evakuierung und Absperrung einleiten'],
+   info:'RCIEDs werden durch Funksignal ausgelöst. Der KMBD-Einsatz erfordert Störsender. Erst dann ist eine sichere Annäherung möglich.'}
+];
+
+function initKampfmittel(){
+  const g=document.getElementById('km-grid');
+  if(!g) return;
+  g.innerHTML=KM.map((k,i)=>{
+    const gefahrClass=k.gefahr==='hoch'?'dt-hoch':k.gefahr==='mittel'?'dt-mittel':'dt-niedrig';
+    const kitHtml=k.kit?'<span class="danger-tag dt-niedrig">Möglich</span>':'<span class="danger-tag dt-hoch">Nicht möglich</span>';
+    const erkHtml=k.erkennung.map(e=>'<div style="font-size:13px;margin-bottom:4px;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#3b82f6">&#9658;</span>'+e+'</div>').join('');
+    const verHtml=k.verhalten.map((v,vi)=>'<div style="font-size:13px;margin-bottom:4px;padding-left:20px;position:relative"><span style="position:absolute;left:0;font-weight:700;color:#fc8181">'+(vi+1)+'.</span>'+v+'</div>').join('');
+    return '<div class="km-card" id="km-'+i+'" onclick="toggleKm('+i+')">'
+      +'<div class="km-card-head"><div class="km-icon" style="background:'+k.farbe+'">'+k.icon+'</div>'
+      +'<div><div class="km-card-title">'+k.label+'</div><div class="km-card-sub">'+k.sub+'</div></div></div>'
+      +'<div class="km-body">'
+      +'<div class="km-row"><span class="km-key">Gefahrenstufe:</span><span class="km-val"><span class="danger-tag '+gefahrClass+'">'+k.gefahr.toUpperCase()+'</span></span></div>'
+      +'<div class="km-row"><span class="km-key">Typ:</span><span class="km-val">'+k.typ+'</span></div>'
+      +'<div class="km-row"><span class="km-key">Herkunft:</span><span class="km-val">'+k.herkunft+'</span></div>'
+      +'<div class="km-row"><span class="km-key">Kit-Einsatz:</span><span class="km-val">'+kitHtml+'</span></div>'
+      +'<hr class="km-divider">'
+      +'<div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:6px">Erkennung</div>'+erkHtml
+      +'<hr class="km-divider">'
+      +'<div style="font-size:11px;font-weight:700;color:#fc8181;text-transform:uppercase;margin-bottom:6px">Sofortverhalten</div>'+verHtml
+      +'<div style="background:#1e2535;border-left:3px solid #1F3864;border-radius:0 6px 6px 0;padding:10px 14px;margin-top:10px;font-size:12px;color:#60a5fa;line-height:1.6">'+k.info+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function toggleKm(i){ document.getElementById('km-'+i).classList.toggle('open'); }
+</script>
+<div id="user-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#21262d;border-radius:6px;border:1px solid #30363d;padding:22px;width:400px">
+    <div style="font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:16px;text-transform:uppercase;letter-spacing:.03em">Neuen Zugang anlegen</div>
+    <div class="field-label">Benutzername</div><input class="field-input" id="nu-username" placeholder="z.B. mueller" style="margin-bottom:10px">
+    <div class="field-label">Passwort</div><input class="field-input" id="nu-password" placeholder="Passwort vergeben" style="margin-bottom:10px">
+    <div class="field-label">Name / Dienstgrad (für Personalakte)</div><input class="field-input" id="nu-fullname" placeholder="Nachname, Vorname" style="margin-bottom:14px">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeUserModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveNewUser()">Zugang anlegen</button>
+    </div>
+  </div>
+</div>
+
+<div id="akte-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#21262d;border-radius:6px;border:1px solid #30363d;padding:22px;width:400px">
+    <div style="font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:16px;text-transform:uppercase;letter-spacing:.03em">Neue Personalakte anlegen</div>
+    <div class="field-label">Name / Dienstgrad</div><input class="field-input" id="na-name" placeholder="Nachname, Vorname" style="margin-bottom:10px">
+    <div class="field-label">Dienstnummer</div><input class="field-input" id="na-dnr" placeholder="optional" style="margin-bottom:10px">
+    <div class="field-label">Zugehöriger Login (optional)</div>
+    <select class="field-input" id="na-login" style="margin-bottom:10px"></select>
+    <div style="font-size:11px;color:#586069;margin-bottom:14px">Personalakten können auch ohne bestehenden Login angelegt werden, z.B. für externe Bewerber.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeNewAkteModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveNewAkte()">Akte anlegen</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#21262d;border-radius:6px;border:1px solid #5c2e30;padding:22px;width:380px">
+    <div style="font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:10px">Bestätigen</div>
+    <div style="font-size:13px;color:#c9d1d9;margin-bottom:18px;line-height:1.5" id="confirm-message">Wirklich fortfahren?</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn" style="background:#3d2528;color:#e5989b;border-color:#5c2e30" id="confirm-yes-btn">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:12px 18px;color:#e6edf3;font-size:13px;z-index:400;box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:340px"></div>
+
+</body>
+</html>
